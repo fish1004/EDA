@@ -49,7 +49,7 @@ int main(int argc,char*argv[]){
         cout<<"error! enter:./student_ID.exe Pattern_Tree.v circuit1.v on terminal" <<endl;
     }
 
-
+ ///////////////////////////////////////////////////////////////////////////////////////////////////For test: you can enter it on terminal : ./Hw1.txt Pattern_Tree.v circuit1.v
 
 
     return  0;
