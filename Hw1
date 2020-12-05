@@ -1,0 +1,425 @@
+#include<iostream>
+using namespace std;
+#include<string>
+#include<fstream>
+#include<vector>
+#include<sstream>
+int pattern_num=0;
+int length=0;
+class TreeNode{
+public:
+
+    string type;
+    string data;
+    string left,right;
+    int cost=0;
+    TreeNode* leftchild=NULL;
+    TreeNode* rightchild=NULL;
+};
+
+class Tree{
+public:
+    vector<TreeNode> v1;
+    int v1_length;
+
+    TreeNode CreateNode();
+    void connected(vector<TreeNode>&,int);
+
+    int found(string,string,int);
+
+};
+    size_t found(string arr,string line,int position);
+    TreeNode Circuit_input(string,string);
+    vector<Tree> Pattern_input(string);
+    int MinCost(TreeNode*,vector<TreeNode>&);
+    int pattern_match(TreeNode *i_n,vector<TreeNode>& p_n);
+    vector<TreeNode> check(TreeNode* ,TreeNode*);
+int main(int argc,char*argv[]){
+    string arg1,arg2;
+
+    if(argc>3){
+        cout<<"Too much argument!! enter:./student_ID.exe Pattern_Tree.v circuit1.v on terminal "<<endl;
+    }
+    else if(argc==3){
+        arg1=argv[1];
+        arg2=argv[2];
+        Circuit_input(arg1,arg2);
+    }
+    else{
+        cout<<"error! enter:./student_ID.exe Pattern_Tree.v circuit1.v on terminal" <<endl;
+    }
+
+
+
+
+    return  0;
+
+
+
+}
+
+TreeNode Circuit_input(string arg1,string arg2)
+{
+    string line;
+    string arr="N";
+    string arr_1=" ";
+    string arr_2="(";
+    string arr_3=",";
+    string arr_4=")";
+    Tree t;
+    ifstream in(arg2);
+    if(in)
+        while(getline(in,line)){
+              size_t f=found(arr,line,0);
+
+              if(f!= string::npos){                        // NAND A(a,a1,a2)
+                  size_t a0=found(arr,line,0);
+                  size_t a1=found(arr_1,line,0);
+                  size_t a2=found(arr_2,line,0);
+                  size_t a3=found(arr_3,line,0);
+                  size_t a4=found(arr_3,line,a3+1);
+                  size_t a5=found(arr_4,line,0);
+                  TreeNode t1;
+                  t1.data.assign(line,a2+1,a3-a2-1);
+                  t1.type.assign(line,a0,a1);
+                  if(a4!= string::npos){
+                       t1.left.assign(line,a3+2,a4-a3-2);             //  ","+" "=2
+                       t1.right.assign(line,a4+2,a5-a4-2);
+                  }
+                  else{
+                       t1.left.assign(line,a3+2,a5-a3-2);
+                       t1.right="0";                       // set null=0
+                  }
+                  t.v1.push_back(t1);
+
+                  length++;
+
+              }
+              else{
+
+              }
+
+        }
+    else{
+        cout<<"no such file!"<<endl;
+    }
+    t.connected(t.v1,length);
+    vector<Tree> p=Pattern_input(arg1);
+    vector<TreeNode> pp;
+    for(int i=0;i<pattern_num;i++){
+        p[i].connected(p[i].v1,p[i].v1_length+2);
+        pp.push_back(p[i].v1[p[i].v1_length]);
+    }
+    int cost=0;
+    cost=MinCost(&t.v1[length-1],pp);
+    cout<<" Minimum cost is : "<<cost<<endl;                // Final answer!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+    return t.v1[length-1];  //length =13
+
+
+}
+vector<Tree> Pattern_input(string arg1)
+{
+    string line;
+    string module="mod";
+    string cos="co";
+    string arr="N";
+    string arr_1=" ";
+    string arr_2="(";
+    string arr_3=",";
+    string arr_4=")";
+    Tree t[7];
+    int num=0,len=0;
+    ifstream in(arg1);
+    if(in)
+        while(getline(in,line)){
+              size_t f=found(arr,line,0);
+              size_t g=found(cos,line,0);
+              size_t h=found(module,line,0);
+              if((f!= string::npos && h==string::npos) || g!= string::npos){                        // NAND A(a,a1,a2
+
+                  size_t a0=found(arr,line,0);
+                  size_t a1=found(arr_1,line,0);
+                  size_t a2=found(arr_2,line,0);
+                  size_t a3=found(arr_3,line,0);
+                  size_t a4=found(arr_3,line,a3+1);
+                  size_t a5=found(arr_4,line,0);
+                  TreeNode t1;
+                  if(f!=string::npos){
+                    t1.data.assign(line,a2+1,a3-a2-1);                //data
+                    t1.type.assign(line,a0,a1);                       //type
+
+                    if(a4!= string::npos){
+                        t1.left.assign(line,a3+2,a4-a3-2);             //  ","+" "=2
+                        t1.right.assign(line,a4+2,a5-a4-2);
+                    }
+                    else{
+                        t1.left.assign(line,a3+2,a5-a3-2);
+                        t1.right="0";                       // set null=0
+                    }
+
+                  }
+
+                  t[num].v1.push_back(t1);
+                  size_t finish=found(cos,line,0);  // to finish a tree
+                  len++;
+
+                  if(finish!=string::npos){
+                    stringstream ss;              // str to int
+                    int sss;
+                    ss<<line[a5+2];
+                    ss>>sss;
+                    t[num].v1[len-2].cost=sss;
+                    t[num].connected(t[num].v1,len);
+                    t[num].v1_length=len-2;
+
+
+                    len=0;
+                    num++;
+                  }
+
+              }
+              else{
+
+              }
+
+        }
+    else{
+        cout<<"no such file!"<<endl;
+    }
+    pattern_num=num;                          // in test case num =7
+    vector<Tree> tt;
+    for(int i=0;i<pattern_num;i++){
+        tt.push_back(t[i]);
+    }
+
+
+    return tt;
+}
+
+size_t found(string arr,string line,int position)
+{
+    size_t s =line.find(arr,position);
+    return s;
+}
+void Tree ::connected(vector<TreeNode> &t,int len)
+{
+    for(int i=0;i<len;i++){
+            for(int j=0;j<len;j++){
+                if(t[i].left==t[j].data){
+                    t[i].leftchild=&t[j];
+                    break;
+                }
+                else {
+                    t[i].leftchild=NULL;
+                }
+
+            }
+
+    }
+    for(int i=0;i<len;i++){
+            for(int j=0;j<len;j++){
+                if(t[i].right==t[j].data){
+                    t[i].rightchild=&t[j];
+
+                    break;
+                }
+                else {
+                    t[i].rightchild=NULL;
+
+
+                }
+
+            }
+
+    }
+}
+int  MinCost(TreeNode* root,vector<TreeNode> &t)
+{
+
+
+    if(root!=NULL){
+        if(root->type=="NAND"){
+            root->cost=2;
+        }
+        else {
+            root->cost=1;
+        }
+
+        MinCost(root->leftchild,t);
+        MinCost(root->rightchild,t);
+        if(root->leftchild!=NULL && root->rightchild!=NULL){
+             root->cost=root->cost+root->leftchild->cost+root->rightchild->cost;
+
+        }
+        else if(root->leftchild!=NULL){
+             root->cost=root->cost+root->leftchild->cost;
+
+        }
+        else if(root->rightchild!=NULL){
+             root->cost=root->cost+root->rightchild->cost;
+        }
+        else{
+
+        }
+        int cost_match=0;
+        cost_match=pattern_match(root,t);
+
+        if(cost_match<root->cost){
+            root->cost=cost_match;
+        }
+        return cost_match;
+
+    }
+
+}
+int pattern_match(TreeNode* i_n,vector<TreeNode>& p_n)
+{
+
+    vector<TreeNode>t;
+    vector<TreeNode>t1;
+    int cost_final=0;
+    int cost_final1=0;
+    int cost_new=0;
+    int cost_new1=0;
+    if(i_n !=NULL){
+        for(int i=0;i<pattern_num;i++){                             // 7 can change
+            if(i_n->type==p_n[i].type){
+                int detect=0;
+                int detect1=0;
+
+                TreeNode* v1=new TreeNode;
+
+                v1=&p_n[i];
+                  t=check(i_n,v1);
+
+
+
+               for(int j=0;j<t.size();j++){
+                    if(t[j].type=="None"){
+                      detect++;
+                    }
+
+                }
+                if(detect==0){
+
+                    cost_new=p_n[i].cost;
+                    for(int k=0;k<t.size();k++){
+                        cost_new+=t[k].cost;                     // can check again ,I ignore use double match
+                    }
+                }
+
+
+ ////////////////////////////////////////////////////////////////////
+                TreeNode *temp=new TreeNode;                   // let leftchild and rightchild change to sure check all combination
+                temp=v1->leftchild;
+                v1->leftchild=v1->rightchild;
+                v1->rightchild=temp;
+                t1=check(i_n,v1);
+
+              for(int j=0;j<t1.size();j++){
+                    if(t1[j].type=="None"){
+                      detect1++;
+                    }
+
+                }
+
+                if(detect1==0){
+
+                    cost_new1=p_n[i].cost;
+                    for(int k=0;k<t1.size();k++){
+                        cost_new1+=t1[k].cost;                     // can check again ,I ignore use double match
+                    }
+                }
+  /////////////////////////////////////////////////////////////////////
+                TreeNode *temp0=new TreeNode;                      // change leftchilde and rightchild pointer again let them the same as initial
+                temp0=v1->leftchild;
+                v1->leftchild=v1->rightchild;
+                v1->rightchild=temp0;
+
+            }
+
+
+
+
+        if(cost_final==0){
+             cost_final= cost_new;
+        }
+        else if(cost_new!=0){
+            cost_final= (cost_new<cost_final)? cost_new:cost_final;
+        }
+        else{
+            cost_final=cost_new;
+
+        }
+/////////////////////////////////////////////////////////////////////////////////
+        if(cost_final1==0){
+             cost_final1= cost_new1;
+        }
+        else if(cost_new1!=0){
+            cost_final1= (cost_new1<cost_final1)? cost_new1:cost_final1;
+        }
+        else{
+                cost_final1=cost_new1;
+
+        }
+
+
+        }
+    }
+    int cost=0;
+    cost=(cost_final<cost_final1)? cost_final:cost_final1;
+
+    return cost;
+}
+vector<TreeNode> check(TreeNode* i_n,TreeNode* p_n)
+{
+
+
+    vector<TreeNode> t;
+    vector<TreeNode> t_temp;
+    vector<TreeNode> t_temp0;
+    TreeNode t1;
+    t1.type="None";
+    TreeNode t2;
+    t2.cost=0;
+
+
+    if(i_n !=NULL&& p_n!=NULL){
+
+        if(i_n->type != p_n->type){
+            t.push_back(t1);
+        }
+        if(i_n->type == p_n->type){
+
+            check(i_n->leftchild,p_n->leftchild);
+            check(i_n->rightchild,p_n->rightchild);
+
+        }
+
+
+
+        t_temp=check(i_n->leftchild,p_n->leftchild);
+        t.insert(t.end(),t_temp.begin(),t_temp.end());
+        t_temp0=check(i_n->rightchild,p_n->rightchild);
+        t.insert(t.end(),t_temp0.begin(),t_temp0.end());
+
+    }
+    else if(i_n !=NULL){
+        t.push_back(* i_n);
+    }
+    else if(p_n!= NULL){
+        t.push_back(t1);
+    }
+    else{
+
+
+    }
+
+
+
+    return t;
+}
+
+
+
